@@ -4,6 +4,14 @@ import Worker from "worker-loader!./worker";
 if (!!window.chrome && !!window.chrome.webstore) {
   var recognition = new (window.webkitSpeechRecognition ||
     window.SpeechRecognition)();
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then(function(stream) {
+      console.log("You let me use your mic!");
+    })
+    .catch(function(err) {
+      console.log("No Mic Permission!");
+    });
 } else {
   var context = new (window.AudioContext ||
     window.webkitAudioContext ||
@@ -23,7 +31,7 @@ export default class Speech {
 
   start(getText) {
     this.recording = true;
-    if (recognition) {
+    if (!!recognition) {
       //Chrome Support
       recognition.lang = "en-US";
       recognition.interimResults = false;
@@ -71,9 +79,9 @@ export default class Speech {
             encoder.terminate();
             encoder = null;
           } else if (e.data.cmd === "debug") {
-             console.log(`debugging: ${e.data}`);
+            console.log(`debugging: ${e.data}`);
           } else {
-             console.error(`Unknown event: ${e.data.cmd}`);
+            console.error(`Unknown event: ${e.data.cmd}`);
           }
         };
 
@@ -97,10 +105,9 @@ export default class Speech {
       } catch (err) {
         // when speech error occurs
         console.log("speech service -->", err);
-       
       }
     } else {
-     console.log('Not supportted');
+      console.log("Not supportted");
     }
   }
 
@@ -157,20 +164,20 @@ export default class Speech {
     if (!!recognition) {
       recognition.abort();
     } else {
-    const tracks = this.stream.getAudioTracks();
+      const tracks = this.stream.getAudioTracks();
 
-    for (let i = tracks.length - 1; i >= 0; --i) {
-      tracks[i].stop();
-    }
+      for (let i = tracks.length - 1; i >= 0; --i) {
+        tracks[i].stop();
+      }
 
-    this.recording = false;
-    encoder.postMessage({
-      cmd: "finish"
-    });
+      this.recording = false;
+      encoder.postMessage({
+        cmd: "finish"
+      });
 
-    this.input.disconnect();
-    this.node.disconnect();
-    this.input = this.node = null;
+      this.input.disconnect();
+      this.node.disconnect();
+      this.input = this.node = null;
     }
   }
 }
