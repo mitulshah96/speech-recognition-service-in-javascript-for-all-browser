@@ -152,6 +152,7 @@ module.exports = {
               
               compact: true,
             },
+            
           },
           // The notation here is somewhat confusing.
           // "postcss" loader applies autoprefixer to our CSS.
